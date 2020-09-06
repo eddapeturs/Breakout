@@ -16,13 +16,10 @@ class Ball:
 
     def update(self, delta_time):
         if(self.position.x <= 0 + self.radius):
-            # self.position.x = 1
             self.direction.x = -self.direction.x
         if(self.position.x >= 800 - self.radius):
-            # self.position.x = 799
             self.direction.x = -self.direction.x
         if(self.position.y >= 800 - self.radius):
-            # self.position.y = 799
             self.direction.y = -self.direction.y
         self.position.x += self.direction.x * delta_time * self.speed
         self.position.y += self.direction.y * delta_time * self.speed
@@ -42,7 +39,7 @@ class Ball:
 
         glPopMatrix()
 
-    def checkCollision(self, otherObject, delta_time):
+    def check_collision(self, otherObject, delta_time):
         right_x = otherObject.x + otherObject.width
         upper_y = otherObject.y + otherObject.height
 
@@ -106,3 +103,6 @@ class Ball:
             print("self.position.y", round(float(self.position.y), 2))
             # print("collision")
     
+    def check_loss(self):
+        if(self.position.y < 0):
+            return True

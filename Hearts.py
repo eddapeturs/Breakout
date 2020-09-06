@@ -43,7 +43,7 @@ class Hearts:
 
         glPopMatrix()
 
-    def remove_life():
+    def remove_life(self):
         self.lives -= 1
         if self.lives == 0:
             return "game over"
