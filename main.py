@@ -26,15 +26,31 @@ class Breakout():
         # Screen attributes
         self.screen_width = 800
         self.screen_height = 800
-
+        self.level = 0
+        self.max_level = 3
         self.clock = pygame.time.Clock()
-
-        self.paddle = Paddle(self.screen_width, self.screen_height, 150, 20)
-        self.ball = Ball(Point(200, 100), Vector(2, 6))
         self.hearts = Hearts(Point(650, 780))
+        self.game_won = False
+        self.game_lost = False
+
+        pygame.display.init()
+        pygame.display.set_caption('Breakout')
+        pygame.display.set_mode((self.screen_width, self.screen_height), DOUBLEBUF|OPENGL)
+
+        glClearColor(0.0, 0.0, 0.0, 0.0)
+
+        pygame.mixer.init(44100, -16, 2, 64)
+        self.tile_sound = pygame.mixer.Sound('assets/cymbal.wav')
+
+        self.restart()
+
+    
+    def restart(self):
+        paddle_width = 170 - (self.level * 20)
+        self.paddle = Paddle(self.screen_width, self.screen_height, paddle_width, 20)
+        self.ball = Ball(Point(200, 100), Vector(2, 6))
+        # self.hearts = Hearts(Point(650, 780))
         self.tiles = []
-        # tile = Tile(10, 10)
-        # self.title = "Hello"
 
         self.colors = [
             [1.0, 0.0, 0.0], # Red
@@ -45,15 +61,14 @@ class Breakout():
             [1.0, 0.0, 1.0]  # Cyan
         ]
 
-        pygame.display.init()
-        pygame.display.set_mode((self.screen_width, self.screen_height), DOUBLEBUF|OPENGL)
-        glClearColor(0.0, 0.0, 0.0, 0.0)
-
         self.init_tiles()
+        self.level += 1
 
     def init_tiles(self):
-        columns = 10
-        rows = 8
+        # columns = 5 + (self.level * 5)
+        # rows = 4 + (self.level * 2)
+        columns = 2
+        rows = 1
         no_of_paddings = columns - 1
         padding_left = 20
         padding_right = 20
@@ -84,12 +99,21 @@ class Breakout():
             if(self.ball.check_loss()):
                 # remove a life & make a new ball
                 self.hearts.remove_life()
+                if self.hearts.lives == 0:
+                    self.game_lost = True
                 self.ball = Ball(Point(200, 100), Vector(2, 6))
 
 
         for tile in self.tiles:
             if(self.ball.check_collision(tile, self.delta_time)):
+                self.tile_sound.play()
                 self.tiles.remove(tile)
+
+        if self.tiles == []:
+            if self.level == self.max_level:
+                self.game_won = True
+            else:
+                self.restart()
         
 
     def display(self):
@@ -133,8 +157,17 @@ class Breakout():
                 elif event.key == K_RIGHT:
                     self.paddle.going_right = False
 
-        self.update()
-        self.display()
+        if self.game_won or self.game_lost:        
+            self.win_or_lose()
+        else:
+            self.update()
+            self.display()
+
+    def win_or_lose(self):
+        if self.game_won:
+            
+        if self.game_lost:
+            print("L")
 
 if __name__ == "__main__":
     # init_game()

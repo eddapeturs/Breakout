@@ -8,7 +8,7 @@ class Ball:
     def __init__(self, position, direction):
         self.position = position            # point
         self.direction = direction          # vector
-        self.speed = 30
+        self.speed = 60
         self.radius = 10
         self.DEG2RAD = 3.14159/180
         # self.angle = -90
@@ -16,17 +16,18 @@ class Ball:
 
     def update(self, delta_time):
         if(self.position.x <= 0 + self.radius):
+            self.position.x = self.radius + 2               # Done to make sure ball doesn't get "trapped"
             self.direction.x = -self.direction.x
         if(self.position.x >= 800 - self.radius):
+            self.position.x = 800 - (self.radius + 2)
             self.direction.x = -self.direction.x
         if(self.position.y >= 800 - self.radius):
+            self.position.y = 800 - (self.radius + 2)
             self.direction.y = -self.direction.y
         self.position.x += self.direction.x * delta_time * self.speed
         self.position.y += self.direction.y * delta_time * self.speed
 
     def display(self):
-        # print("self.position.x", self.position.x)
-        # print("self.position.y", self.position.y)
         glPushMatrix()
         # glTranslate(self.position.x, self.position.y, 0)
 
