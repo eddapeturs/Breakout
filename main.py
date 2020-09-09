@@ -1,25 +1,14 @@
 import pygame
 from pygame.locals import *
-
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-# from freetype import *
-
-# from OpenGL.GL import *
-# from OpenGL.GLU import *
-
-# from math import cos, sin
-
 import random
-
 from Ball import *
 from Paddle import *
 from BaseObjects import *
 from Tile import *
 from Hearts import *
-# from random import *
-
 
 class Breakout():
     def __init__(self):
@@ -32,9 +21,9 @@ class Breakout():
         self.hearts = Hearts(Point(650, 780))
         self.game_won = False
         self.game_lost = False
+        self.game_on = True
 
         pygame.display.init()
-        pygame.display.set_caption('Breakout')
         pygame.display.set_mode((self.screen_width, self.screen_height), DOUBLEBUF|OPENGL)
 
         glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -46,10 +35,10 @@ class Breakout():
 
     
     def restart(self):
+        self.level += 1
         paddle_width = 170 - (self.level * 20)
         self.paddle = Paddle(self.screen_width, self.screen_height, paddle_width, 20)
-        self.ball = Ball(Point(200, 100), Vector(2, 6))
-        # self.hearts = Hearts(Point(650, 780))
+        self.ball = Ball(Point(-200, -200), Vector(120 + (self.level*60), 360 + (self.level * 60)))
         self.tiles = []
 
         self.colors = [
@@ -61,14 +50,13 @@ class Breakout():
             [1.0, 0.0, 1.0]  # Cyan
         ]
 
+        pygame.display.set_caption('Level ' + str(self.level))
+
         self.init_tiles()
-        self.level += 1
 
     def init_tiles(self):
-        # columns = 5 + (self.level * 5)
-        # rows = 4 + (self.level * 2)
-        columns = 2
-        rows = 1
+        columns = 5 + (self.level * 5)
+        rows = 4 + (self.level * 2)
         no_of_paddings = columns - 1
         padding_left = 20
         padding_right = 20
@@ -97,11 +85,11 @@ class Breakout():
         if self.ball.position.y < 100:
             self.ball.check_collision(self.paddle, self.delta_time)
             if(self.ball.check_loss()):
-                # remove a life & make a new ball
                 self.hearts.remove_life()
                 if self.hearts.lives == 0:
                     self.game_lost = True
-                self.ball = Ball(Point(200, 100), Vector(2, 6))
+                    self.game_on = False
+                self.ball = Ball(Point(-200, -200), Vector(120 + (self.level*60), 360 + (self.level * 60)))
 
 
         for tile in self.tiles:
@@ -112,6 +100,7 @@ class Breakout():
         if self.tiles == []:
             if self.level == self.max_level:
                 self.game_won = True
+                self.game_on = False
             else:
                 self.restart()
         
@@ -128,12 +117,15 @@ class Breakout():
         glViewport(0,0,self.screen_width,self.screen_height)
         gluOrtho2D(0, 800, 0, 800)
         
-        self.paddle.draw_paddle()
-        self.ball.display()
-        self.hearts.display()
+        if self.game_on:
+            self.paddle.draw_paddle()
+            self.ball.display()
+            self.hearts.display()
 
-        for tile in self.tiles:
-            tile.draw_tile()
+            for tile in self.tiles:
+                tile.draw_tile()
+        else:
+            self.win_or_lose()
 
         pygame.display.flip()
 
@@ -157,17 +149,36 @@ class Breakout():
                 elif event.key == K_RIGHT:
                     self.paddle.going_right = False
 
-        if self.game_won or self.game_lost:        
-            self.win_or_lose()
-        else:
+        if self.game_on:
             self.update()
-            self.display()
+        self.display()
 
     def win_or_lose(self):
+        # width = 100
+        # height = 100
+        black = (0, 0, 0) 
+        green = (0, 255, 0) 
+        blue = (0, 0, 128) 
+        red = (255, 0, 0) 
+        X = self.screen_width / 2
+        Y = self.screen_height / 2
+        display_surface = pygame.display.set_mode((self.screen_width, self.screen_height))
+        pygame.font.init()
+        font = pygame.font.Font('cyberdynehalfital.ttf', 50) 
+  
+        # set the center of the rectangular object. 
+        # textRect.center = (X, Y) 
+
         if self.game_won:
-            
+            text = font.render('You Win!', True, green, black) 
         if self.game_lost:
-            print("L")
+            text = font.render('Game over', True, red, black) 
+        textRect = text.get_rect()
+        textRect.center = (X, Y) 
+        display_surface.fill(black) 
+        display_surface.blit(text, textRect) 
+
+
 
 if __name__ == "__main__":
     # init_game()
